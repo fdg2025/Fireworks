@@ -228,4 +228,34 @@ ESC - 关闭菜单
 			localStorage.setItem("keyboardHintShown", "true");
 		}, 3000);
 	}
+
+	// Add direct DOM button event listeners as fallback
+	const pauseBtn = document.querySelector('.pause-btn');
+	const soundBtn = document.querySelector('.sound-btn');
+	const settingsBtn = document.querySelector('.settings-btn');
+	
+	if (pauseBtn) {
+		pauseBtn.addEventListener('click', (e) => {
+			e.stopPropagation();
+			actions.togglePause();
+		});
+	}
+	
+	if (soundBtn) {
+		soundBtn.addEventListener('click', (e) => {
+			e.stopPropagation();
+			actions.toggleSound();
+		});
+	}
+	
+	if (settingsBtn) {
+		settingsBtn.addEventListener('click', (e) => {
+			e.stopPropagation();
+			if (window.configUI) {
+				window.configUI.openConfigPanel();
+			} else {
+				actions.toggleMenu();
+			}
+		});
+	}
 }
