@@ -207,6 +207,12 @@ function startRecording() {
 		return;
 	}
 	
+	// Check if MediaRecorder is supported
+	if (!window.MediaRecorder) {
+		showShareFeedback('您的浏览器不支持录制功能', 'error');
+		return;
+	}
+	
 	// Create a temporary canvas to combine both layers
 	const tempCanvas = document.createElement('canvas');
 	tempCanvas.width = mainCanvas.width;
@@ -227,9 +233,34 @@ function startRecording() {
 	updateCanvas();
 	
 	try {
+		// Check if canvas.captureStream is available
+		if (!tempCanvas.captureStream) {
+			showShareFeedback('您的浏览器不支持captureStream', 'error');
+			return;
+		}
+		
 		const stream = tempCanvas.captureStream(30); // 30 FPS
+		
+		// Try different mimeTypes with fallback
+		let mimeType = 'video/webm;codecs=vp9';
+		if (!MediaRecorder.isTypeSupported(mimeType)) {
+			mimeType = 'video/webm;codecs=vp8';
+			if (!MediaRecorder.isTypeSupported(mimeType)) {
+				mimeType = 'video/webm';
+				if (!MediaRecorder.isTypeSupported(mimeType)) {
+					mimeType = 'video/mp4';
+					if (!MediaRecorder.isTypeSupported(mimeType)) {
+						showShareFeedback('浏览器不支持录制格式', 'error');
+						return;
+					}
+				}
+			}
+		}
+		
+		console.log('使用录制格式:', mimeType);
+		
 		mediaRecorder = new MediaRecorder(stream, {
-			mimeType: 'video/webm;codecs=vp9',
+			mimeType: mimeType,
 			videoBitsPerSecond: 2500000 // 2.5 Mbps
 		});
 		
@@ -242,25 +273,32 @@ function startRecording() {
 		};
 		
 		mediaRecorder.onstop = () => {
-			const blob = new Blob(recordedChunks, { type: 'video/webm' });
+			const blob = new Blob(recordedChunks, { type: mimeType });
 			const url = URL.createObjectURL(blob);
 			
 			// Update preview with video
 			const previewContainer = document.getElementById('share-preview');
 			previewContainer.innerHTML = `
 				<video controls autoplay loop style="width: 100%; height: 100%; object-fit: contain;">
-					<source src="${url}" type="video/webm">
+					<source src="${url}" type="${mimeType}">
 				</video>
 			`;
 			
 			// Store the blob for downloading
 			sharePanel.dataset.captureType = 'video';
 			sharePanel.dataset.captureData = url;
+			sharePanel.dataset.captureMimeType = mimeType;
 			
 			// Enable download button
 			document.getElementById('btn-download').disabled = false;
 			
 			showShareFeedback('录制完成 ✓');
+		};
+		
+		mediaRecorder.onerror = (error) => {
+			console.error('MediaRecorder error:', error);
+			showShareFeedback('录制出错: ' + error, 'error');
+			isRecording = false;
 		};
 		
 		mediaRecorder.start();
@@ -274,7 +312,7 @@ function startRecording() {
 		`;
 		recordBtn.classList.add('share-btn--recording');
 		
-		showShareFeedback('开始录制...');
+		showShareFeedback('开始录制...⏺️');
 		
 		// Auto-stop after 3 seconds
 		setTimeout(() => {
@@ -315,6 +353,7 @@ function stopRecording() {
 function downloadCapture() {
 	const captureType = sharePanel.dataset.captureType;
 	const captureData = sharePanel.dataset.captureData;
+	const captureMimeType = sharePanel.dataset.captureMimeType;
 	
 	if (!captureType || !captureData) {
 		showShareFeedback('没有可下载的内容', 'error');
@@ -328,11 +367,19 @@ function downloadCapture() {
 		link.download = `firework-${timestamp}.png`;
 		link.href = captureData;
 	} else if (captureType === 'video') {
-		link.download = `firework-${timestamp}.webm`;
+		// Determine file extension from MIME type
+		let ext = 'webm';
+		if (captureMimeType && captureMimeType.includes('mp4')) {
+			ext = 'mp4';
+		}
+		link.download = `firework-${timestamp}.${ext}`;
 		link.href = captureData;
 	}
 	
+	document.body.appendChild(link);
 	link.click();
+	document.body.removeChild(link);
+	
 	showShareFeedback('下载开始 ✓');
 }
 
