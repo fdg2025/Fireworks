@@ -30,7 +30,12 @@ export function bindInput({
 				return;
 			}
 			if (event.x > mainStage.width - btnSize) {
-				actions.toggleMenu();
+				// Open new configuration panel instead of old menu
+				if (window.configUI) {
+					window.configUI.openConfigPanel();
+				} else {
+					actions.toggleMenu();
+				}
 				return;
 			}
 		}
