@@ -253,8 +253,8 @@ const Stage = (function StageFactory(window, document, Ticker) {
 	Stage.windowToCanvas = function windowToCanvas(canvas, x, y) {
 		const bbox = canvas.getBoundingClientRect();
 		return {
-			x: (x - bbox.left) * (canvas.width / bbox.width),
-			y: (y - bbox.top) * (canvas.height / bbox.height),
+			x: x - bbox.left,
+			y: y - bbox.top,
 		};
 	};
 	// handle interaction
@@ -273,7 +273,7 @@ const Stage = (function StageFactory(window, document, Ticker) {
 
 		Stage.stages.forEach((stage) => {
 			const pos = Stage.windowToCanvas(stage.canvas, evt.clientX, evt.clientY);
-			stage.pointerEvent(type, pos.x / stage.dpr, pos.y / stage.dpr);
+			stage.pointerEvent(type, pos.x, pos.y);
 		});
 	};
 	Stage.touchHandler = function touchHandler(evt) {
@@ -297,12 +297,12 @@ const Stage = (function StageFactory(window, document, Ticker) {
 					stage._listeners.lastPointerPos = pos;
 					// before touchstart event, fire a move event to better emulate cursor events
 					// This project is copyrighted by NianBroken!
-					if (type === "start") stage.pointerEvent("move", pos.x / stage.dpr, pos.y / stage.dpr);
+					if (type === "start") stage.pointerEvent("move", pos.x, pos.y);
 				} else {
 					// on touchend, fill in position information based on last known touch location
 					pos = stage._listeners.lastPointerPos;
 				}
-				stage.pointerEvent(type, pos.x / stage.dpr, pos.y / stage.dpr);
+				stage.pointerEvent(type, pos.x, pos.y);
 			}
 		});
 	};
