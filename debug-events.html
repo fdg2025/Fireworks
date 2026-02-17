@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>事件调试工具</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #0f0;
+        }
+        .log {
+            padding: 10px;
+            margin: 5px 0;
+            background: #000;
+            border: 1px solid #0f0;
+        }
+        .test-area {
+            width: 300px;
+            height: 200px;
+            background: #333;
+            border: 2px solid #0f0;
+            margin: 20px 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .clear-btn {
+            padding: 10px 20px;
+            background: #0f0;
+            color: #000;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 烟花模拟器 - 事件调试工具</h1>
+    
+    <button class="clear-btn" onclick="clearLogs()">清除日志</button>
+    
+    <div class="test-area" id="testArea">
+        点击这里测试
+    </div>
+    
+    <h2>事件日志：</h2>
+    <div id="logs"></div>
+    
+    <script>
+        const logs = document.getElementById('logs');
+        const testArea = document.getElementById('testArea');
+        
+        function log(message) {
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log';
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logs.insertBefore(logEntry, logs.firstChild);
+        }
+        
+        function clearLogs() {
+            logs.innerHTML = '';
+        }
+        
+        // 监听所有可能的事件
+        const events = ['mousedown', 'mouseup', 'click', 'touchstart', 'touchend', 'pointerdown', 'pointerup'];
+        
+        events.forEach(eventType => {
+            testArea.addEventListener(eventType, (e) => {
+                log(`✓ ${eventType} 事件触发 - X: ${e.clientX || 'N/A'}, Y: ${e.clientY || 'N/A'}`);
+            }, { passive: false });
+        });
+        
+        // 检查是否有元素阻挡
+        testArea.addEventListener('click', (e) => {
+            const element = document.elementFromPoint(e.clientX, e.clientY);
+            log(`点击位置的元素: ${element.tagName}.${element.className}`);
+        });
+        
+        log('事件监听器已就绪');
+        
+        // 打开主页面进行测试
+        setTimeout(() => {
+            const openMain = confirm('是否在新窗口中打开主页面进行对比测试？');
+            if (openMain) {
+                window.open('./index.html', '_blank');
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
