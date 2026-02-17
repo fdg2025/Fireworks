@@ -40,6 +40,10 @@ const trailsStage = new Stage("trails-canvas");
 const mainStage = new Stage("main-canvas");
 const stages = [trailsStage, mainStage];
 
+// Expose Stage for debugging
+window.Stage = Stage;
+window.mainStage = mainStage;
+
 let appNodes = null;
 
 // 自定义背景

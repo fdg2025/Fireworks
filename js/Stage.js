@@ -199,6 +199,9 @@ const Stage = (function StageFactory(window, document, Ticker) {
 			pointerout: [],
 			lastPointerPos: { x: 0, y: 0 },
 		};
+		
+		// Register this stage instance for event handling
+		Stage.stages.push(this);
 	}
 
 	// track all Stage instances
