@@ -17,23 +17,19 @@ export function bindInput({
 	let isUpdatingSpeed = false;
 
 	mainStage.addEventListener("pointerstart", (event) => {
-		console.log('[Input] Canvas pointerstart:', event.x, event.y, event.onCanvas);
 		ui.hideTapHint();
 		const btnSize = 50;
 
 		if (event.y < btnSize) {
 			if (event.x < btnSize) {
-				console.log('[Input] Pause area clicked');
 				actions.togglePause();
 				return;
 			}
 			if (event.x > mainStage.width / 2 - btnSize / 2 && event.x < mainStage.width / 2 + btnSize / 2) {
-				console.log('[Input] Sound area clicked');
 				actions.toggleSound();
 				return;
 			}
 			if (event.x > mainStage.width - btnSize) {
-				console.log('[Input] Settings area clicked');
 				// Open new configuration panel instead of old menu
 				if (window.configUI) {
 					window.configUI.openConfigPanel();
@@ -47,16 +43,11 @@ export function bindInput({
 		const handledSpeed = loop.startSpeedUpdate(event);
 		isUpdatingSpeed = handledSpeed;
 		if (handledSpeed) {
-			console.log('[Input] Speed update handled');
 			return;
 		}
 
-		if (!selectorApi.isRunning()) {
-			console.log('[Input] App not running, ignoring click');
-			return;
-		}
+		if (!selectorApi.isRunning()) return;
 		if (event.onCanvas) {
-			console.log('[Input] Launching shell at:', event.x, event.y);
 			shellSystem.launchShellFromConfig(event);
 		}
 	});
@@ -239,37 +230,29 @@ ESC - 关闭菜单
 	}
 
 	// Add direct DOM button event listeners as fallback
-	// Wait for DOM to be ready
 	setTimeout(() => {
 		const pauseBtn = document.querySelector('.pause-btn');
 		const soundBtn = document.querySelector('.sound-btn');
 		const settingsBtn = document.querySelector('.settings-btn');
 		
-		console.log('[Input] Button elements:', { pauseBtn, soundBtn, settingsBtn });
-		
 		if (pauseBtn) {
 			pauseBtn.addEventListener('click', (e) => {
-				console.log('[Input] Pause button clicked');
 				e.stopPropagation();
 				e.preventDefault();
 				actions.togglePause();
 			});
-			console.log('[Input] Pause button listener attached');
 		}
 		
 		if (soundBtn) {
 			soundBtn.addEventListener('click', (e) => {
-				console.log('[Input] Sound button clicked');
 				e.stopPropagation();
 				e.preventDefault();
 				actions.toggleSound();
 			});
-			console.log('[Input] Sound button listener attached');
 		}
 		
 		if (settingsBtn) {
 			settingsBtn.addEventListener('click', (e) => {
-				console.log('[Input] Settings button clicked');
 				e.stopPropagation();
 				e.preventDefault();
 				if (window.configUI) {
@@ -278,7 +261,6 @@ ESC - 关闭菜单
 					actions.toggleMenu();
 				}
 			});
-			console.log('[Input] Settings button listener attached');
 		}
 	}, 100);
 }
